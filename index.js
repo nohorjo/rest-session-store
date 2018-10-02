@@ -3,6 +3,7 @@ const debug = require('debug');
 const axios = require('axios');
 const { authenticator } = require('otplib');
 const crypto = require('crypto');
+const diff = require('recursive-deep-diff');
 
 const algorithm = 'aes-128-cbc';
 
@@ -26,6 +27,7 @@ module.exports = function(session) {
         log('all');
         this.request({method: 'GET'})
             .then(data => {
+                Object.values(data).forEach(s => s.ORIGINAL = s);
                 cb(null, data);
             }).catch(cb);
     }
@@ -58,6 +60,7 @@ module.exports = function(session) {
             method: 'GET',
         }).then(data => {
             log.debug('get', data);
+            data.ORIGINAL = data;
             cb(null, data);
         }).catch(cb);
     }
@@ -65,10 +68,12 @@ module.exports = function(session) {
     RestSessionStore.prototype.set = function(url, session, cb) {
         log('set', url);
         log.debug('set', session);
+        const _orig = session.ORIGINAL;
+        delete session.ORIGINAL;
         this.request({
             url,
             method: 'POST',
-            data: {next: encrypt(JSON.stringify(session, (_, v) => v === undefined ? '__undefined' : v))}
+            data: {next: encrypt(JSON.stringify(diff(_orig, session), (_, v) => v === undefined ? '__undefined' : v))}
         }).then(cb)
         .catch(cb);
     }
