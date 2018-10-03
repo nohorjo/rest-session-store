@@ -62,6 +62,7 @@ module.exports = function(session) {
             method: 'GET',
         }).then(data => {
             log.debug('get', data);
+            if (!data.cookie) data.cookie = {};
             data.ORIGINAL = clone(data);
             cb(null, data);
         }).catch(cb);

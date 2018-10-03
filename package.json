@@ -1,6 +1,6 @@
 {
   "name": "rest-session-store",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Express session store using rest-session-cache https://github.com/nohorjo/rest-session-cache",
   "main": "index.js",
   "scripts": {
