@@ -73,7 +73,7 @@ module.exports = function(session) {
         this.request({
             url,
             method: 'POST',
-            data: {next: encrypt(JSON.stringify(diff(_orig, session), (_, v) => v === undefined ? '__undefined' : v))}
+            data: {next: this.encrypt(JSON.stringify(diff(_orig, session), (_, v) => v === undefined ? '__undefined' : v))}
         }).then(cb)
         .catch(cb);
     }
