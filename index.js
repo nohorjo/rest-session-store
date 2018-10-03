@@ -11,6 +11,8 @@ const log = debug('rest-session-store:log');
 log.error = debug('rest-session-store:error');
 log.debug = debug('rest-session-store:debug');
 
+const clone = o => JSON.parse(JSON.stringify(o));
+
 module.exports = function(session) {
     function RestSessionStore(options) {
         log('init');
@@ -27,7 +29,7 @@ module.exports = function(session) {
         log('all');
         this.request({method: 'GET'})
             .then(data => {
-                Object.values(data).forEach(s => s.ORIGINAL = s);
+                Object.values(data).forEach(s => s.ORIGINAL = clone(s));
                 cb(null, data);
             }).catch(cb);
     }
@@ -60,7 +62,7 @@ module.exports = function(session) {
             method: 'GET',
         }).then(data => {
             log.debug('get', data);
-            data.ORIGINAL = data;
+            data.ORIGINAL = clone(data);
             cb(null, data);
         }).catch(cb);
     }
@@ -68,8 +70,9 @@ module.exports = function(session) {
     RestSessionStore.prototype.set = function(url, session, cb) {
         log('set', url);
         log.debug('set', session);
-        const _orig = session.ORIGINAL;
+        const _orig = session.ORIGINAL || {};
         delete session.ORIGINAL;
+        session = clone(session);
         this.request({
             url,
             method: 'POST',
@@ -80,11 +83,11 @@ module.exports = function(session) {
 
     RestSessionStore.prototype.request = function(opts) {
         return axios({
-            baseUrl: this.options.url,
+            baseURL: this.options.url,
             url: '/',
             params: {otp: authenticator.generate(this.options.secret)},
             ...opts
-        }).then(({data}) => data && JSON.parse(this.decrypt(data)));
+        }).then(({data}) => opts.method == 'GET' && JSON.parse(this.decrypt(data)));
     }
     
     RestSessionStore.prototype.encrypt = function(text) {
