@@ -1,6 +1,6 @@
 const util = require('util');
 const debug = require('debug');
-const axios = require('axios');
+const fetch = require('node-fetch');
 const { authenticator } = require('otplib');
 const crypto = require('crypto');
 const diff = require('recursive-deep-diff');
@@ -82,13 +82,12 @@ module.exports = function(session) {
         .catch(cb);
     }
 
-    RestSessionStore.prototype.request = function(opts) {
-        return axios({
-            baseURL: this.options.url,
-            url: '/',
-            params: {otp: authenticator.generate(this.options.secret)},
+    RestSessionStore.prototype.request = function({data, url, ...opts}) {
+        return fetch(`${this.options.url}${url || '/'}?otp=${authenticator.generate(this.options.secret)}`, {
+            body: JSON.stringify(data),
             ...opts
-        }).then(({data}) => opts.method == 'GET' && JSON.parse(this.decrypt(data)));
+        }).then(resp => opts.method === 'GET' && resp.text())
+        .then(data => data && JSON.parse(this.decrypt(data)));
     }
     
     RestSessionStore.prototype.encrypt = function(text) {
