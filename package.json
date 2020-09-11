@@ -22,7 +22,7 @@
   "homepage": "https://github.com/nohorjo/rest-session-store#readme",
   "dependencies": {
     "debug": "3.1.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "otplib": "^10.0.1",
     "recursive-deep-diff": "nohorjo/recursive-deep-diff"
   }
